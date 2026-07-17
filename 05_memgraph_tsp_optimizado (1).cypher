@@ -1,0 +1,791 @@
+// 05_memgraph_tsp_optimizado.cypher — TSP en Cypher puro (Memgraph), version optimizada
+// El patron encadenado c1->c2->...->cN->c1 con desigualdades en el WHERE permite
+// que el motor descarte ramas con ciudades repetidas DURANTE la expansion
+// (filter pushdown), enumerando solo permutaciones en lugar de todos los caminos.
+// Ejecutar UNA consulta a la vez y anotar el tiempo reportado por mgconsole/Lab.
+
+// ==================== N = 4 ciudades ====================
+MATCH (c1:Ciudad {id: 1})-[r1:DIST]->(c2:Ciudad)-[r2:DIST]->(c3:Ciudad)-[r3:DIST]->(c4:Ciudad)-[r4:DIST]->(c1)
+WHERE c2.id <= 4
+  AND c3.id <= 4
+  AND c4.id <= 4
+  AND c2.id <> c3.id
+  AND c2.id <> c4.id
+  AND c3.id <> c4.id
+  AND c2.id < c4.id  // rompe la simetria: evita contar cada ciclo dos veces
+WITH [c1.id, c2.id, c3.id, c4.id, 1] AS ruta, [c1.nombre, c2.nombre, c3.nombre, c4.nombre, c1.nombre] AS ciudades, r1.km + r2.km + r3.km + r4.km AS costo
+ORDER BY costo ASC
+LIMIT 1
+RETURN ruta, ciudades, toString(toInteger(costo)) + " km" AS costo_total;
+
+// ==================== N = 6 ciudades ====================
+MATCH (c1:Ciudad {id: 1})-[r1:DIST]->(c2:Ciudad)-[r2:DIST]->(c3:Ciudad)-[r3:DIST]->(c4:Ciudad)-[r4:DIST]->(c5:Ciudad)-[r5:DIST]->(c6:Ciudad)-[r6:DIST]->(c1)
+WHERE c2.id <= 6
+  AND c3.id <= 6
+  AND c4.id <= 6
+  AND c5.id <= 6
+  AND c6.id <= 6
+  AND c2.id <> c3.id
+  AND c2.id <> c4.id
+  AND c2.id <> c5.id
+  AND c2.id <> c6.id
+  AND c3.id <> c4.id
+  AND c3.id <> c5.id
+  AND c3.id <> c6.id
+  AND c4.id <> c5.id
+  AND c4.id <> c6.id
+  AND c5.id <> c6.id
+  AND c2.id < c6.id  // rompe la simetria: evita contar cada ciclo dos veces
+WITH [c1.id, c2.id, c3.id, c4.id, c5.id, c6.id, 1] AS ruta, [c1.nombre, c2.nombre, c3.nombre, c4.nombre, c5.nombre, c6.nombre, c1.nombre] AS ciudades, r1.km + r2.km + r3.km + r4.km + r5.km + r6.km AS costo
+ORDER BY costo ASC
+LIMIT 1
+RETURN ruta, ciudades, toString(toInteger(costo)) + " km" AS costo_total;
+
+// ==================== N = 8 ciudades ====================
+MATCH (c1:Ciudad {id: 1})-[r1:DIST]->(c2:Ciudad)-[r2:DIST]->(c3:Ciudad)-[r3:DIST]->(c4:Ciudad)-[r4:DIST]->(c5:Ciudad)-[r5:DIST]->(c6:Ciudad)-[r6:DIST]->(c7:Ciudad)-[r7:DIST]->(c8:Ciudad)-[r8:DIST]->(c1)
+WHERE c2.id <= 8
+  AND c3.id <= 8
+  AND c4.id <= 8
+  AND c5.id <= 8
+  AND c6.id <= 8
+  AND c7.id <= 8
+  AND c8.id <= 8
+  AND c2.id <> c3.id
+  AND c2.id <> c4.id
+  AND c2.id <> c5.id
+  AND c2.id <> c6.id
+  AND c2.id <> c7.id
+  AND c2.id <> c8.id
+  AND c3.id <> c4.id
+  AND c3.id <> c5.id
+  AND c3.id <> c6.id
+  AND c3.id <> c7.id
+  AND c3.id <> c8.id
+  AND c4.id <> c5.id
+  AND c4.id <> c6.id
+  AND c4.id <> c7.id
+  AND c4.id <> c8.id
+  AND c5.id <> c6.id
+  AND c5.id <> c7.id
+  AND c5.id <> c8.id
+  AND c6.id <> c7.id
+  AND c6.id <> c8.id
+  AND c7.id <> c8.id
+  AND c2.id < c8.id  // rompe la simetria: evita contar cada ciclo dos veces
+WITH [c1.id, c2.id, c3.id, c4.id, c5.id, c6.id, c7.id, c8.id, 1] AS ruta, [c1.nombre, c2.nombre, c3.nombre, c4.nombre, c5.nombre, c6.nombre, c7.nombre, c8.nombre, c1.nombre] AS ciudades, r1.km + r2.km + r3.km + r4.km + r5.km + r6.km + r7.km + r8.km AS costo
+ORDER BY costo ASC
+LIMIT 1
+RETURN ruta, ciudades, toString(toInteger(costo)) + " km" AS costo_total;
+
+// ==================== N = 10 ciudades ====================
+MATCH (c1:Ciudad {id: 1})-[r1:DIST]->(c2:Ciudad)-[r2:DIST]->(c3:Ciudad)-[r3:DIST]->(c4:Ciudad)-[r4:DIST]->(c5:Ciudad)-[r5:DIST]->(c6:Ciudad)-[r6:DIST]->(c7:Ciudad)-[r7:DIST]->(c8:Ciudad)-[r8:DIST]->(c9:Ciudad)-[r9:DIST]->(c10:Ciudad)-[r10:DIST]->(c1)
+WHERE c2.id <= 10
+  AND c3.id <= 10
+  AND c4.id <= 10
+  AND c5.id <= 10
+  AND c6.id <= 10
+  AND c7.id <= 10
+  AND c8.id <= 10
+  AND c9.id <= 10
+  AND c10.id <= 10
+  AND c2.id <> c3.id
+  AND c2.id <> c4.id
+  AND c2.id <> c5.id
+  AND c2.id <> c6.id
+  AND c2.id <> c7.id
+  AND c2.id <> c8.id
+  AND c2.id <> c9.id
+  AND c2.id <> c10.id
+  AND c3.id <> c4.id
+  AND c3.id <> c5.id
+  AND c3.id <> c6.id
+  AND c3.id <> c7.id
+  AND c3.id <> c8.id
+  AND c3.id <> c9.id
+  AND c3.id <> c10.id
+  AND c4.id <> c5.id
+  AND c4.id <> c6.id
+  AND c4.id <> c7.id
+  AND c4.id <> c8.id
+  AND c4.id <> c9.id
+  AND c4.id <> c10.id
+  AND c5.id <> c6.id
+  AND c5.id <> c7.id
+  AND c5.id <> c8.id
+  AND c5.id <> c9.id
+  AND c5.id <> c10.id
+  AND c6.id <> c7.id
+  AND c6.id <> c8.id
+  AND c6.id <> c9.id
+  AND c6.id <> c10.id
+  AND c7.id <> c8.id
+  AND c7.id <> c9.id
+  AND c7.id <> c10.id
+  AND c8.id <> c9.id
+  AND c8.id <> c10.id
+  AND c9.id <> c10.id
+  AND c2.id < c10.id  // rompe la simetria: evita contar cada ciclo dos veces
+WITH [c1.id, c2.id, c3.id, c4.id, c5.id, c6.id, c7.id, c8.id, c9.id, c10.id, 1] AS ruta, [c1.nombre, c2.nombre, c3.nombre, c4.nombre, c5.nombre, c6.nombre, c7.nombre, c8.nombre, c9.nombre, c10.nombre, c1.nombre] AS ciudades, r1.km + r2.km + r3.km + r4.km + r5.km + r6.km + r7.km + r8.km + r9.km + r10.km AS costo
+ORDER BY costo ASC
+LIMIT 1
+RETURN ruta, ciudades, toString(toInteger(costo)) + " km" AS costo_total;
+
+// ==================== N = 12 ciudades ====================
+MATCH (c1:Ciudad {id: 1})-[r1:DIST]->(c2:Ciudad)-[r2:DIST]->(c3:Ciudad)-[r3:DIST]->(c4:Ciudad)-[r4:DIST]->(c5:Ciudad)-[r5:DIST]->(c6:Ciudad)-[r6:DIST]->(c7:Ciudad)-[r7:DIST]->(c8:Ciudad)-[r8:DIST]->(c9:Ciudad)-[r9:DIST]->(c10:Ciudad)-[r10:DIST]->(c11:Ciudad)-[r11:DIST]->(c12:Ciudad)-[r12:DIST]->(c1)
+WHERE c2.id <= 12
+  AND c3.id <= 12
+  AND c4.id <= 12
+  AND c5.id <= 12
+  AND c6.id <= 12
+  AND c7.id <= 12
+  AND c8.id <= 12
+  AND c9.id <= 12
+  AND c10.id <= 12
+  AND c11.id <= 12
+  AND c12.id <= 12
+  AND c2.id <> c3.id
+  AND c2.id <> c4.id
+  AND c2.id <> c5.id
+  AND c2.id <> c6.id
+  AND c2.id <> c7.id
+  AND c2.id <> c8.id
+  AND c2.id <> c9.id
+  AND c2.id <> c10.id
+  AND c2.id <> c11.id
+  AND c2.id <> c12.id
+  AND c3.id <> c4.id
+  AND c3.id <> c5.id
+  AND c3.id <> c6.id
+  AND c3.id <> c7.id
+  AND c3.id <> c8.id
+  AND c3.id <> c9.id
+  AND c3.id <> c10.id
+  AND c3.id <> c11.id
+  AND c3.id <> c12.id
+  AND c4.id <> c5.id
+  AND c4.id <> c6.id
+  AND c4.id <> c7.id
+  AND c4.id <> c8.id
+  AND c4.id <> c9.id
+  AND c4.id <> c10.id
+  AND c4.id <> c11.id
+  AND c4.id <> c12.id
+  AND c5.id <> c6.id
+  AND c5.id <> c7.id
+  AND c5.id <> c8.id
+  AND c5.id <> c9.id
+  AND c5.id <> c10.id
+  AND c5.id <> c11.id
+  AND c5.id <> c12.id
+  AND c6.id <> c7.id
+  AND c6.id <> c8.id
+  AND c6.id <> c9.id
+  AND c6.id <> c10.id
+  AND c6.id <> c11.id
+  AND c6.id <> c12.id
+  AND c7.id <> c8.id
+  AND c7.id <> c9.id
+  AND c7.id <> c10.id
+  AND c7.id <> c11.id
+  AND c7.id <> c12.id
+  AND c8.id <> c9.id
+  AND c8.id <> c10.id
+  AND c8.id <> c11.id
+  AND c8.id <> c12.id
+  AND c9.id <> c10.id
+  AND c9.id <> c11.id
+  AND c9.id <> c12.id
+  AND c10.id <> c11.id
+  AND c10.id <> c12.id
+  AND c11.id <> c12.id
+  AND c2.id < c12.id  // rompe la simetria: evita contar cada ciclo dos veces
+WITH [c1.id, c2.id, c3.id, c4.id, c5.id, c6.id, c7.id, c8.id, c9.id, c10.id, c11.id, c12.id, 1] AS ruta, [c1.nombre, c2.nombre, c3.nombre, c4.nombre, c5.nombre, c6.nombre, c7.nombre, c8.nombre, c9.nombre, c10.nombre, c11.nombre, c12.nombre, c1.nombre] AS ciudades, r1.km + r2.km + r3.km + r4.km + r5.km + r6.km + r7.km + r8.km + r9.km + r10.km + r11.km + r12.km AS costo
+ORDER BY costo ASC
+LIMIT 1
+RETURN ruta, ciudades, toString(toInteger(costo)) + " km" AS costo_total;
+
+// ==================== N = 14 ciudades ====================
+MATCH (c1:Ciudad {id: 1})-[r1:DIST]->(c2:Ciudad)-[r2:DIST]->(c3:Ciudad)-[r3:DIST]->(c4:Ciudad)-[r4:DIST]->(c5:Ciudad)-[r5:DIST]->(c6:Ciudad)-[r6:DIST]->(c7:Ciudad)-[r7:DIST]->(c8:Ciudad)-[r8:DIST]->(c9:Ciudad)-[r9:DIST]->(c10:Ciudad)-[r10:DIST]->(c11:Ciudad)-[r11:DIST]->(c12:Ciudad)-[r12:DIST]->(c13:Ciudad)-[r13:DIST]->(c14:Ciudad)-[r14:DIST]->(c1)
+WHERE c2.id <= 14
+  AND c3.id <= 14
+  AND c4.id <= 14
+  AND c5.id <= 14
+  AND c6.id <= 14
+  AND c7.id <= 14
+  AND c8.id <= 14
+  AND c9.id <= 14
+  AND c10.id <= 14
+  AND c11.id <= 14
+  AND c12.id <= 14
+  AND c13.id <= 14
+  AND c14.id <= 14
+  AND c2.id <> c3.id
+  AND c2.id <> c4.id
+  AND c2.id <> c5.id
+  AND c2.id <> c6.id
+  AND c2.id <> c7.id
+  AND c2.id <> c8.id
+  AND c2.id <> c9.id
+  AND c2.id <> c10.id
+  AND c2.id <> c11.id
+  AND c2.id <> c12.id
+  AND c2.id <> c13.id
+  AND c2.id <> c14.id
+  AND c3.id <> c4.id
+  AND c3.id <> c5.id
+  AND c3.id <> c6.id
+  AND c3.id <> c7.id
+  AND c3.id <> c8.id
+  AND c3.id <> c9.id
+  AND c3.id <> c10.id
+  AND c3.id <> c11.id
+  AND c3.id <> c12.id
+  AND c3.id <> c13.id
+  AND c3.id <> c14.id
+  AND c4.id <> c5.id
+  AND c4.id <> c6.id
+  AND c4.id <> c7.id
+  AND c4.id <> c8.id
+  AND c4.id <> c9.id
+  AND c4.id <> c10.id
+  AND c4.id <> c11.id
+  AND c4.id <> c12.id
+  AND c4.id <> c13.id
+  AND c4.id <> c14.id
+  AND c5.id <> c6.id
+  AND c5.id <> c7.id
+  AND c5.id <> c8.id
+  AND c5.id <> c9.id
+  AND c5.id <> c10.id
+  AND c5.id <> c11.id
+  AND c5.id <> c12.id
+  AND c5.id <> c13.id
+  AND c5.id <> c14.id
+  AND c6.id <> c7.id
+  AND c6.id <> c8.id
+  AND c6.id <> c9.id
+  AND c6.id <> c10.id
+  AND c6.id <> c11.id
+  AND c6.id <> c12.id
+  AND c6.id <> c13.id
+  AND c6.id <> c14.id
+  AND c7.id <> c8.id
+  AND c7.id <> c9.id
+  AND c7.id <> c10.id
+  AND c7.id <> c11.id
+  AND c7.id <> c12.id
+  AND c7.id <> c13.id
+  AND c7.id <> c14.id
+  AND c8.id <> c9.id
+  AND c8.id <> c10.id
+  AND c8.id <> c11.id
+  AND c8.id <> c12.id
+  AND c8.id <> c13.id
+  AND c8.id <> c14.id
+  AND c9.id <> c10.id
+  AND c9.id <> c11.id
+  AND c9.id <> c12.id
+  AND c9.id <> c13.id
+  AND c9.id <> c14.id
+  AND c10.id <> c11.id
+  AND c10.id <> c12.id
+  AND c10.id <> c13.id
+  AND c10.id <> c14.id
+  AND c11.id <> c12.id
+  AND c11.id <> c13.id
+  AND c11.id <> c14.id
+  AND c12.id <> c13.id
+  AND c12.id <> c14.id
+  AND c13.id <> c14.id
+  AND c2.id < c14.id  // rompe la simetria: evita contar cada ciclo dos veces
+WITH [c1.id, c2.id, c3.id, c4.id, c5.id, c6.id, c7.id, c8.id, c9.id, c10.id, c11.id, c12.id, c13.id, c14.id, 1] AS ruta, [c1.nombre, c2.nombre, c3.nombre, c4.nombre, c5.nombre, c6.nombre, c7.nombre, c8.nombre, c9.nombre, c10.nombre, c11.nombre, c12.nombre, c13.nombre, c14.nombre, c1.nombre] AS ciudades, r1.km + r2.km + r3.km + r4.km + r5.km + r6.km + r7.km + r8.km + r9.km + r10.km + r11.km + r12.km + r13.km + r14.km AS costo
+ORDER BY costo ASC
+LIMIT 1
+RETURN ruta, ciudades, toString(toInteger(costo)) + " km" AS costo_total;
+
+// ==================== N = 16 ciudades ====================
+MATCH (c1:Ciudad {id: 1})-[r1:DIST]->(c2:Ciudad)-[r2:DIST]->(c3:Ciudad)-[r3:DIST]->(c4:Ciudad)-[r4:DIST]->(c5:Ciudad)-[r5:DIST]->(c6:Ciudad)-[r6:DIST]->(c7:Ciudad)-[r7:DIST]->(c8:Ciudad)-[r8:DIST]->(c9:Ciudad)-[r9:DIST]->(c10:Ciudad)-[r10:DIST]->(c11:Ciudad)-[r11:DIST]->(c12:Ciudad)-[r12:DIST]->(c13:Ciudad)-[r13:DIST]->(c14:Ciudad)-[r14:DIST]->(c15:Ciudad)-[r15:DIST]->(c16:Ciudad)-[r16:DIST]->(c1)
+WHERE c2.id <= 16
+  AND c3.id <= 16
+  AND c4.id <= 16
+  AND c5.id <= 16
+  AND c6.id <= 16
+  AND c7.id <= 16
+  AND c8.id <= 16
+  AND c9.id <= 16
+  AND c10.id <= 16
+  AND c11.id <= 16
+  AND c12.id <= 16
+  AND c13.id <= 16
+  AND c14.id <= 16
+  AND c15.id <= 16
+  AND c16.id <= 16
+  AND c2.id <> c3.id
+  AND c2.id <> c4.id
+  AND c2.id <> c5.id
+  AND c2.id <> c6.id
+  AND c2.id <> c7.id
+  AND c2.id <> c8.id
+  AND c2.id <> c9.id
+  AND c2.id <> c10.id
+  AND c2.id <> c11.id
+  AND c2.id <> c12.id
+  AND c2.id <> c13.id
+  AND c2.id <> c14.id
+  AND c2.id <> c15.id
+  AND c2.id <> c16.id
+  AND c3.id <> c4.id
+  AND c3.id <> c5.id
+  AND c3.id <> c6.id
+  AND c3.id <> c7.id
+  AND c3.id <> c8.id
+  AND c3.id <> c9.id
+  AND c3.id <> c10.id
+  AND c3.id <> c11.id
+  AND c3.id <> c12.id
+  AND c3.id <> c13.id
+  AND c3.id <> c14.id
+  AND c3.id <> c15.id
+  AND c3.id <> c16.id
+  AND c4.id <> c5.id
+  AND c4.id <> c6.id
+  AND c4.id <> c7.id
+  AND c4.id <> c8.id
+  AND c4.id <> c9.id
+  AND c4.id <> c10.id
+  AND c4.id <> c11.id
+  AND c4.id <> c12.id
+  AND c4.id <> c13.id
+  AND c4.id <> c14.id
+  AND c4.id <> c15.id
+  AND c4.id <> c16.id
+  AND c5.id <> c6.id
+  AND c5.id <> c7.id
+  AND c5.id <> c8.id
+  AND c5.id <> c9.id
+  AND c5.id <> c10.id
+  AND c5.id <> c11.id
+  AND c5.id <> c12.id
+  AND c5.id <> c13.id
+  AND c5.id <> c14.id
+  AND c5.id <> c15.id
+  AND c5.id <> c16.id
+  AND c6.id <> c7.id
+  AND c6.id <> c8.id
+  AND c6.id <> c9.id
+  AND c6.id <> c10.id
+  AND c6.id <> c11.id
+  AND c6.id <> c12.id
+  AND c6.id <> c13.id
+  AND c6.id <> c14.id
+  AND c6.id <> c15.id
+  AND c6.id <> c16.id
+  AND c7.id <> c8.id
+  AND c7.id <> c9.id
+  AND c7.id <> c10.id
+  AND c7.id <> c11.id
+  AND c7.id <> c12.id
+  AND c7.id <> c13.id
+  AND c7.id <> c14.id
+  AND c7.id <> c15.id
+  AND c7.id <> c16.id
+  AND c8.id <> c9.id
+  AND c8.id <> c10.id
+  AND c8.id <> c11.id
+  AND c8.id <> c12.id
+  AND c8.id <> c13.id
+  AND c8.id <> c14.id
+  AND c8.id <> c15.id
+  AND c8.id <> c16.id
+  AND c9.id <> c10.id
+  AND c9.id <> c11.id
+  AND c9.id <> c12.id
+  AND c9.id <> c13.id
+  AND c9.id <> c14.id
+  AND c9.id <> c15.id
+  AND c9.id <> c16.id
+  AND c10.id <> c11.id
+  AND c10.id <> c12.id
+  AND c10.id <> c13.id
+  AND c10.id <> c14.id
+  AND c10.id <> c15.id
+  AND c10.id <> c16.id
+  AND c11.id <> c12.id
+  AND c11.id <> c13.id
+  AND c11.id <> c14.id
+  AND c11.id <> c15.id
+  AND c11.id <> c16.id
+  AND c12.id <> c13.id
+  AND c12.id <> c14.id
+  AND c12.id <> c15.id
+  AND c12.id <> c16.id
+  AND c13.id <> c14.id
+  AND c13.id <> c15.id
+  AND c13.id <> c16.id
+  AND c14.id <> c15.id
+  AND c14.id <> c16.id
+  AND c15.id <> c16.id
+  AND c2.id < c16.id  // rompe la simetria: evita contar cada ciclo dos veces
+WITH [c1.id, c2.id, c3.id, c4.id, c5.id, c6.id, c7.id, c8.id, c9.id, c10.id, c11.id, c12.id, c13.id, c14.id, c15.id, c16.id, 1] AS ruta, [c1.nombre, c2.nombre, c3.nombre, c4.nombre, c5.nombre, c6.nombre, c7.nombre, c8.nombre, c9.nombre, c10.nombre, c11.nombre, c12.nombre, c13.nombre, c14.nombre, c15.nombre, c16.nombre, c1.nombre] AS ciudades, r1.km + r2.km + r3.km + r4.km + r5.km + r6.km + r7.km + r8.km + r9.km + r10.km + r11.km + r12.km + r13.km + r14.km + r15.km + r16.km AS costo
+ORDER BY costo ASC
+LIMIT 1
+RETURN ruta, ciudades, toString(toInteger(costo)) + " km" AS costo_total;
+
+// ==================== N = 18 ciudades ====================
+MATCH (c1:Ciudad {id: 1})-[r1:DIST]->(c2:Ciudad)-[r2:DIST]->(c3:Ciudad)-[r3:DIST]->(c4:Ciudad)-[r4:DIST]->(c5:Ciudad)-[r5:DIST]->(c6:Ciudad)-[r6:DIST]->(c7:Ciudad)-[r7:DIST]->(c8:Ciudad)-[r8:DIST]->(c9:Ciudad)-[r9:DIST]->(c10:Ciudad)-[r10:DIST]->(c11:Ciudad)-[r11:DIST]->(c12:Ciudad)-[r12:DIST]->(c13:Ciudad)-[r13:DIST]->(c14:Ciudad)-[r14:DIST]->(c15:Ciudad)-[r15:DIST]->(c16:Ciudad)-[r16:DIST]->(c17:Ciudad)-[r17:DIST]->(c18:Ciudad)-[r18:DIST]->(c1)
+WHERE c2.id <= 18
+  AND c3.id <= 18
+  AND c4.id <= 18
+  AND c5.id <= 18
+  AND c6.id <= 18
+  AND c7.id <= 18
+  AND c8.id <= 18
+  AND c9.id <= 18
+  AND c10.id <= 18
+  AND c11.id <= 18
+  AND c12.id <= 18
+  AND c13.id <= 18
+  AND c14.id <= 18
+  AND c15.id <= 18
+  AND c16.id <= 18
+  AND c17.id <= 18
+  AND c18.id <= 18
+  AND c2.id <> c3.id
+  AND c2.id <> c4.id
+  AND c2.id <> c5.id
+  AND c2.id <> c6.id
+  AND c2.id <> c7.id
+  AND c2.id <> c8.id
+  AND c2.id <> c9.id
+  AND c2.id <> c10.id
+  AND c2.id <> c11.id
+  AND c2.id <> c12.id
+  AND c2.id <> c13.id
+  AND c2.id <> c14.id
+  AND c2.id <> c15.id
+  AND c2.id <> c16.id
+  AND c2.id <> c17.id
+  AND c2.id <> c18.id
+  AND c3.id <> c4.id
+  AND c3.id <> c5.id
+  AND c3.id <> c6.id
+  AND c3.id <> c7.id
+  AND c3.id <> c8.id
+  AND c3.id <> c9.id
+  AND c3.id <> c10.id
+  AND c3.id <> c11.id
+  AND c3.id <> c12.id
+  AND c3.id <> c13.id
+  AND c3.id <> c14.id
+  AND c3.id <> c15.id
+  AND c3.id <> c16.id
+  AND c3.id <> c17.id
+  AND c3.id <> c18.id
+  AND c4.id <> c5.id
+  AND c4.id <> c6.id
+  AND c4.id <> c7.id
+  AND c4.id <> c8.id
+  AND c4.id <> c9.id
+  AND c4.id <> c10.id
+  AND c4.id <> c11.id
+  AND c4.id <> c12.id
+  AND c4.id <> c13.id
+  AND c4.id <> c14.id
+  AND c4.id <> c15.id
+  AND c4.id <> c16.id
+  AND c4.id <> c17.id
+  AND c4.id <> c18.id
+  AND c5.id <> c6.id
+  AND c5.id <> c7.id
+  AND c5.id <> c8.id
+  AND c5.id <> c9.id
+  AND c5.id <> c10.id
+  AND c5.id <> c11.id
+  AND c5.id <> c12.id
+  AND c5.id <> c13.id
+  AND c5.id <> c14.id
+  AND c5.id <> c15.id
+  AND c5.id <> c16.id
+  AND c5.id <> c17.id
+  AND c5.id <> c18.id
+  AND c6.id <> c7.id
+  AND c6.id <> c8.id
+  AND c6.id <> c9.id
+  AND c6.id <> c10.id
+  AND c6.id <> c11.id
+  AND c6.id <> c12.id
+  AND c6.id <> c13.id
+  AND c6.id <> c14.id
+  AND c6.id <> c15.id
+  AND c6.id <> c16.id
+  AND c6.id <> c17.id
+  AND c6.id <> c18.id
+  AND c7.id <> c8.id
+  AND c7.id <> c9.id
+  AND c7.id <> c10.id
+  AND c7.id <> c11.id
+  AND c7.id <> c12.id
+  AND c7.id <> c13.id
+  AND c7.id <> c14.id
+  AND c7.id <> c15.id
+  AND c7.id <> c16.id
+  AND c7.id <> c17.id
+  AND c7.id <> c18.id
+  AND c8.id <> c9.id
+  AND c8.id <> c10.id
+  AND c8.id <> c11.id
+  AND c8.id <> c12.id
+  AND c8.id <> c13.id
+  AND c8.id <> c14.id
+  AND c8.id <> c15.id
+  AND c8.id <> c16.id
+  AND c8.id <> c17.id
+  AND c8.id <> c18.id
+  AND c9.id <> c10.id
+  AND c9.id <> c11.id
+  AND c9.id <> c12.id
+  AND c9.id <> c13.id
+  AND c9.id <> c14.id
+  AND c9.id <> c15.id
+  AND c9.id <> c16.id
+  AND c9.id <> c17.id
+  AND c9.id <> c18.id
+  AND c10.id <> c11.id
+  AND c10.id <> c12.id
+  AND c10.id <> c13.id
+  AND c10.id <> c14.id
+  AND c10.id <> c15.id
+  AND c10.id <> c16.id
+  AND c10.id <> c17.id
+  AND c10.id <> c18.id
+  AND c11.id <> c12.id
+  AND c11.id <> c13.id
+  AND c11.id <> c14.id
+  AND c11.id <> c15.id
+  AND c11.id <> c16.id
+  AND c11.id <> c17.id
+  AND c11.id <> c18.id
+  AND c12.id <> c13.id
+  AND c12.id <> c14.id
+  AND c12.id <> c15.id
+  AND c12.id <> c16.id
+  AND c12.id <> c17.id
+  AND c12.id <> c18.id
+  AND c13.id <> c14.id
+  AND c13.id <> c15.id
+  AND c13.id <> c16.id
+  AND c13.id <> c17.id
+  AND c13.id <> c18.id
+  AND c14.id <> c15.id
+  AND c14.id <> c16.id
+  AND c14.id <> c17.id
+  AND c14.id <> c18.id
+  AND c15.id <> c16.id
+  AND c15.id <> c17.id
+  AND c15.id <> c18.id
+  AND c16.id <> c17.id
+  AND c16.id <> c18.id
+  AND c17.id <> c18.id
+  AND c2.id < c18.id  // rompe la simetria: evita contar cada ciclo dos veces
+WITH [c1.id, c2.id, c3.id, c4.id, c5.id, c6.id, c7.id, c8.id, c9.id, c10.id, c11.id, c12.id, c13.id, c14.id, c15.id, c16.id, c17.id, c18.id, 1] AS ruta, [c1.nombre, c2.nombre, c3.nombre, c4.nombre, c5.nombre, c6.nombre, c7.nombre, c8.nombre, c9.nombre, c10.nombre, c11.nombre, c12.nombre, c13.nombre, c14.nombre, c15.nombre, c16.nombre, c17.nombre, c18.nombre, c1.nombre] AS ciudades, r1.km + r2.km + r3.km + r4.km + r5.km + r6.km + r7.km + r8.km + r9.km + r10.km + r11.km + r12.km + r13.km + r14.km + r15.km + r16.km + r17.km + r18.km AS costo
+ORDER BY costo ASC
+LIMIT 1
+RETURN ruta, ciudades, toString(toInteger(costo)) + " km" AS costo_total;
+
+// ==================== N = 20 ciudades ====================
+MATCH (c1:Ciudad {id: 1})-[r1:DIST]->(c2:Ciudad)-[r2:DIST]->(c3:Ciudad)-[r3:DIST]->(c4:Ciudad)-[r4:DIST]->(c5:Ciudad)-[r5:DIST]->(c6:Ciudad)-[r6:DIST]->(c7:Ciudad)-[r7:DIST]->(c8:Ciudad)-[r8:DIST]->(c9:Ciudad)-[r9:DIST]->(c10:Ciudad)-[r10:DIST]->(c11:Ciudad)-[r11:DIST]->(c12:Ciudad)-[r12:DIST]->(c13:Ciudad)-[r13:DIST]->(c14:Ciudad)-[r14:DIST]->(c15:Ciudad)-[r15:DIST]->(c16:Ciudad)-[r16:DIST]->(c17:Ciudad)-[r17:DIST]->(c18:Ciudad)-[r18:DIST]->(c19:Ciudad)-[r19:DIST]->(c20:Ciudad)-[r20:DIST]->(c1)
+WHERE c2.id <= 20
+  AND c3.id <= 20
+  AND c4.id <= 20
+  AND c5.id <= 20
+  AND c6.id <= 20
+  AND c7.id <= 20
+  AND c8.id <= 20
+  AND c9.id <= 20
+  AND c10.id <= 20
+  AND c11.id <= 20
+  AND c12.id <= 20
+  AND c13.id <= 20
+  AND c14.id <= 20
+  AND c15.id <= 20
+  AND c16.id <= 20
+  AND c17.id <= 20
+  AND c18.id <= 20
+  AND c19.id <= 20
+  AND c20.id <= 20
+  AND c2.id <> c3.id
+  AND c2.id <> c4.id
+  AND c2.id <> c5.id
+  AND c2.id <> c6.id
+  AND c2.id <> c7.id
+  AND c2.id <> c8.id
+  AND c2.id <> c9.id
+  AND c2.id <> c10.id
+  AND c2.id <> c11.id
+  AND c2.id <> c12.id
+  AND c2.id <> c13.id
+  AND c2.id <> c14.id
+  AND c2.id <> c15.id
+  AND c2.id <> c16.id
+  AND c2.id <> c17.id
+  AND c2.id <> c18.id
+  AND c2.id <> c19.id
+  AND c2.id <> c20.id
+  AND c3.id <> c4.id
+  AND c3.id <> c5.id
+  AND c3.id <> c6.id
+  AND c3.id <> c7.id
+  AND c3.id <> c8.id
+  AND c3.id <> c9.id
+  AND c3.id <> c10.id
+  AND c3.id <> c11.id
+  AND c3.id <> c12.id
+  AND c3.id <> c13.id
+  AND c3.id <> c14.id
+  AND c3.id <> c15.id
+  AND c3.id <> c16.id
+  AND c3.id <> c17.id
+  AND c3.id <> c18.id
+  AND c3.id <> c19.id
+  AND c3.id <> c20.id
+  AND c4.id <> c5.id
+  AND c4.id <> c6.id
+  AND c4.id <> c7.id
+  AND c4.id <> c8.id
+  AND c4.id <> c9.id
+  AND c4.id <> c10.id
+  AND c4.id <> c11.id
+  AND c4.id <> c12.id
+  AND c4.id <> c13.id
+  AND c4.id <> c14.id
+  AND c4.id <> c15.id
+  AND c4.id <> c16.id
+  AND c4.id <> c17.id
+  AND c4.id <> c18.id
+  AND c4.id <> c19.id
+  AND c4.id <> c20.id
+  AND c5.id <> c6.id
+  AND c5.id <> c7.id
+  AND c5.id <> c8.id
+  AND c5.id <> c9.id
+  AND c5.id <> c10.id
+  AND c5.id <> c11.id
+  AND c5.id <> c12.id
+  AND c5.id <> c13.id
+  AND c5.id <> c14.id
+  AND c5.id <> c15.id
+  AND c5.id <> c16.id
+  AND c5.id <> c17.id
+  AND c5.id <> c18.id
+  AND c5.id <> c19.id
+  AND c5.id <> c20.id
+  AND c6.id <> c7.id
+  AND c6.id <> c8.id
+  AND c6.id <> c9.id
+  AND c6.id <> c10.id
+  AND c6.id <> c11.id
+  AND c6.id <> c12.id
+  AND c6.id <> c13.id
+  AND c6.id <> c14.id
+  AND c6.id <> c15.id
+  AND c6.id <> c16.id
+  AND c6.id <> c17.id
+  AND c6.id <> c18.id
+  AND c6.id <> c19.id
+  AND c6.id <> c20.id
+  AND c7.id <> c8.id
+  AND c7.id <> c9.id
+  AND c7.id <> c10.id
+  AND c7.id <> c11.id
+  AND c7.id <> c12.id
+  AND c7.id <> c13.id
+  AND c7.id <> c14.id
+  AND c7.id <> c15.id
+  AND c7.id <> c16.id
+  AND c7.id <> c17.id
+  AND c7.id <> c18.id
+  AND c7.id <> c19.id
+  AND c7.id <> c20.id
+  AND c8.id <> c9.id
+  AND c8.id <> c10.id
+  AND c8.id <> c11.id
+  AND c8.id <> c12.id
+  AND c8.id <> c13.id
+  AND c8.id <> c14.id
+  AND c8.id <> c15.id
+  AND c8.id <> c16.id
+  AND c8.id <> c17.id
+  AND c8.id <> c18.id
+  AND c8.id <> c19.id
+  AND c8.id <> c20.id
+  AND c9.id <> c10.id
+  AND c9.id <> c11.id
+  AND c9.id <> c12.id
+  AND c9.id <> c13.id
+  AND c9.id <> c14.id
+  AND c9.id <> c15.id
+  AND c9.id <> c16.id
+  AND c9.id <> c17.id
+  AND c9.id <> c18.id
+  AND c9.id <> c19.id
+  AND c9.id <> c20.id
+  AND c10.id <> c11.id
+  AND c10.id <> c12.id
+  AND c10.id <> c13.id
+  AND c10.id <> c14.id
+  AND c10.id <> c15.id
+  AND c10.id <> c16.id
+  AND c10.id <> c17.id
+  AND c10.id <> c18.id
+  AND c10.id <> c19.id
+  AND c10.id <> c20.id
+  AND c11.id <> c12.id
+  AND c11.id <> c13.id
+  AND c11.id <> c14.id
+  AND c11.id <> c15.id
+  AND c11.id <> c16.id
+  AND c11.id <> c17.id
+  AND c11.id <> c18.id
+  AND c11.id <> c19.id
+  AND c11.id <> c20.id
+  AND c12.id <> c13.id
+  AND c12.id <> c14.id
+  AND c12.id <> c15.id
+  AND c12.id <> c16.id
+  AND c12.id <> c17.id
+  AND c12.id <> c18.id
+  AND c12.id <> c19.id
+  AND c12.id <> c20.id
+  AND c13.id <> c14.id
+  AND c13.id <> c15.id
+  AND c13.id <> c16.id
+  AND c13.id <> c17.id
+  AND c13.id <> c18.id
+  AND c13.id <> c19.id
+  AND c13.id <> c20.id
+  AND c14.id <> c15.id
+  AND c14.id <> c16.id
+  AND c14.id <> c17.id
+  AND c14.id <> c18.id
+  AND c14.id <> c19.id
+  AND c14.id <> c20.id
+  AND c15.id <> c16.id
+  AND c15.id <> c17.id
+  AND c15.id <> c18.id
+  AND c15.id <> c19.id
+  AND c15.id <> c20.id
+  AND c16.id <> c17.id
+  AND c16.id <> c18.id
+  AND c16.id <> c19.id
+  AND c16.id <> c20.id
+  AND c17.id <> c18.id
+  AND c17.id <> c19.id
+  AND c17.id <> c20.id
+  AND c18.id <> c19.id
+  AND c18.id <> c20.id
+  AND c19.id <> c20.id
+  AND c2.id < c20.id  // rompe la simetria: evita contar cada ciclo dos veces
+WITH [c1.id, c2.id, c3.id, c4.id, c5.id, c6.id, c7.id, c8.id, c9.id, c10.id, c11.id, c12.id, c13.id, c14.id, c15.id, c16.id, c17.id, c18.id, c19.id, c20.id, 1] AS ruta, [c1.nombre, c2.nombre, c3.nombre, c4.nombre, c5.nombre, c6.nombre, c7.nombre, c8.nombre, c9.nombre, c10.nombre, c11.nombre, c12.nombre, c13.nombre, c14.nombre, c15.nombre, c16.nombre, c17.nombre, c18.nombre, c19.nombre, c20.nombre, c1.nombre] AS ciudades, r1.km + r2.km + r3.km + r4.km + r5.km + r6.km + r7.km + r8.km + r9.km + r10.km + r11.km + r12.km + r13.km + r14.km + r15.km + r16.km + r17.km + r18.km + r19.km + r20.km AS costo
+ORDER BY costo ASC
+LIMIT 1
+RETURN ruta, ciudades, toString(toInteger(costo)) + " km" AS costo_total;
